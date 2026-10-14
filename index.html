@@ -386,4 +386,228 @@
                             </button>
                             <button type="button" id="btn-timer-save" class="flex items-center gap-2 px-4 py-2.5 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 rounded-xl text-sm font-semibold transition">
                                 <i data-lucide="check-square" class="w-4 h-4"></i> Salvar Horas
-                            </button
+                            </button>
+                            <button type="button" id="btn-timer-reset" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lançamento Manual Rápido & Resumo por Categoria (5 Colunas) -->
+                <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 md:p-6 flex flex-col justify-between space-y-5">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-100 flex items-center gap-2 mb-1">
+                            <i data-lucide="plus-square" class="w-4 h-4 text-amber-400"></i>
+                            Registro Rápido de Horas
+                        </h3>
+                        <p class="text-xs text-slate-400 mb-4">Adicione horas diretamente em qualquer dia da semana para recalcular a elasticidade e o DP.</p>
+
+                        <form id="manual-hours-form" class="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                            <div>
+                                <label class="block text-[11px] uppercase text-slate-400 font-semibold mb-1">Atividade</label>
+                                <select id="manual-habit-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100"></select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] uppercase text-slate-400 font-semibold mb-1">Dia</label>
+                                    <select id="manual-day-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] uppercase text-slate-400 font-semibold mb-1">Horas (+h)</label>
+                                    <input type="number" id="manual-hours-input" step="0.25" min="0.1" max="24" value="1.0" required
+                                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-100">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs transition">
+                                Somar Horas na Atividade
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800">
+                        <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Volume Semanal por Categoria</h4>
+                        <div id="category-hours-summary" class="space-y-3"></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- ROTA 3: #metrics (Desempenho + Elasticidade Derivada + DP h)  -->
+        <!-- ============================================================= -->
+        <section id="view-metrics" class="spa-view hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                    <div>
+                        <h2 class="text-base md:text-lg font-bold text-slate-100 flex items-center gap-2">
+                            <i data-lucide="line-chart" class="w-5 h-5 text-cyan-400"></i>
+                            Curvas de Desempenho & Análise de Sensibilidade ($\varepsilon_i$)
+                        </h2>
+                        <p class="text-xs text-slate-400">
+                            Alterne entre o <strong>Painel Total</strong> (evolução diária) e o <strong>Painel por Atividade</strong> (comparativo de Horas, Média $\mu_H$ e Desvio-Padrão $\sigma_H$).
+                        </p>
+                    </div>
+
+                    <div class="flex bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs shrink-0">
+                        <button type="button" id="btn-chart-total" class="px-3 py-1.5 rounded-md bg-cyan-600 text-white font-semibold transition">
+                            1. Painel Total
+                        </button>
+                        <button type="button" id="btn-chart-activity" class="px-3 py-1.5 rounded-md text-slate-400 hover:text-slate-200 font-medium transition">
+                            2. Por Atividade
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+                        <h3 id="left-chart-title" class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-3">
+                            Painel 1: Horas Realizadas por Dia vs. Adesão Diária (%)
+                        </h3>
+                        <div class="relative h-64 w-full">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-cyan-400 mb-3">
+                            Sensibilidade & Elasticidade ($\varepsilon_i$ acompanhando $H_i / H^*_i$)
+                        </h3>
+                        <div class="relative h-64 w-full">
+                            <canvas id="elasticityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quadro Analítico das 3 Medidas de Horas e Derivada -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+                <h3 class="text-sm md:text-base font-bold text-slate-100 mb-1">
+                    Decomposição Psicométrica de Horas (Total, Média $\mu_H$, Desvio-Padrão $\sigma_H$) e Derivada ($\partial A / \partial H$)
+                </h3>
+                <p class="text-xs text-slate-400 mb-4">
+                    O Desvio-Padrão ($\sigma_H$) é calculado em cima das horas realizadas por dia na semana, eliminando a distorção binomial.
+                </p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs md:text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-slate-400 text-[11px] uppercase">
+                                <th class="py-2.5 px-3">Atividade</th>
+                                <th class="py-2.5 px-3 text-center">Frequência ($\mu_f$)</th>
+                                <th class="py-2.5 px-3 text-center text-amber-400">1. Horas Totais ($H/H^*$)</th>
+                                <th class="py-2.5 px-3 text-center text-amber-300">2. Média Horas ($\mu_H$)</th>
+                                <th class="py-2.5 px-3 text-center text-purple-400">3. DP de Horas ($\sigma_H$)</th>
+                                <th class="py-2.5 px-3 text-center text-cyan-400">Derivada ($\partial A / \partial H$)</th>
+                                <th class="py-2.5 px-3 text-center text-emerald-400">Elasticidade ($\varepsilon_i$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="metrics-detail-tbody" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- ROTA 4: #calendar (Réplica Google Agenda & Integração)        -->
+        <!-- ============================================================= -->
+        <section id="view-calendar" class="spa-view hidden space-y-5">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 md:p-5 space-y-4">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-base md:text-lg font-bold text-slate-100 flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-5 h-5 text-blue-400"></i>
+                            Calendário Semanal de Hábitos (Integração Google Agenda)
+                        </h2>
+                        <p class="text-xs text-slate-400">
+                            Toque em qualquer célula de horário para agendar um bloco e enviá-lo com 1 clique para o seu <strong>Google Agenda</strong>.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" id="btn-new-event" class="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Agendar Bloco
+                        </button>
+                        <button type="button" id="btn-export-ics" class="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium border border-slate-700 transition">
+                            <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i> Exportar .ICS
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-950">
+                    <div class="calendar-grid border-b border-slate-800 bg-slate-900/95 sticky top-0 z-10" id="calendar-header-grid"></div>
+                    <div class="max-h-[500px] overflow-y-auto relative">
+                        <div id="calendar-hours-grid" class="divide-y divide-slate-800/40"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================================================================= -->
+    <!-- MODAL 1: EDITAR / CRIAR ATIVIDADE                                 -->
+    <!-- ================================================================= -->
+    <div id="habit-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 md:p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base md:text-lg font-bold text-slate-100">Configurar Atividade & Meta Semanal</h3>
+                <button type="button" id="btn-close-habit-modal" class="text-slate-400 hover:text-white p-1">✕</button>
+            </div>
+
+            <form id="habit-modal-form" class="space-y-4">
+                <input type="hidden" id="modal-habit-index" value="-1">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome da Meta / Hábito</label>
+                        <input type="text" id="modal-habit-name" required placeholder="Ex: Estudo de Psicometria"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Categoria</label>
+                        <select id="modal-habit-category" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100">
+                            <option value="academia">🏋️ Academia</option>
+                            <option value="estudos">📚 Estudos</option>
+                            <option value="saude">❤️ Saúde</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Meta Horas/Semana ($H^*$)</label>
+                        <input type="number" id="modal-habit-target-hours" step="0.5" min="0.5" required value="5"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Prazo (Deadline)</label>
+                        <input type="date" id="modal-habit-deadline"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-slate-100">
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[11px] font-semibold uppercase text-amber-400">Horas Realizadas por Dia ($h_{it}$)</label>
+                        <span class="text-[10px] text-slate-500">Base para Média e DP ($\sigma_H$)</span>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1.5" id="modal-daily-hours-inputs"></div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+                    <button type="button" id="btn-cancel-habit-modal" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-xs md:text-sm font-medium">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs md:text-sm font-semibold">Salvar Meta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL 2: AGENDAR BLOCO & GOOGLE CALENDAR DEEP LINK                -->
+    <!-- ================================================================= -->
+    <div id="event-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 md:p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font
